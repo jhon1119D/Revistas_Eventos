@@ -23,7 +23,8 @@ class Login extends Component
             'password' => $this->password,
         ];
 
-        if (!Auth::attempt($credentials, $this->remember)) {
+        // Siempre intentamos loguear, independientemente del checkbox
+        if (!Auth::attempt($credentials)) {
             $this->js(<<<JS
             window.dispatchEvent(new CustomEvent('show-alert', {
                 detail: {
@@ -36,7 +37,13 @@ class Login extends Component
             return;
         }
 
+        // Si el checkbox está marcado, “remember me” para prolongar la sesión
+        if ($this->remember) {
+            Auth::loginUsingId(Auth::id(), true);
+        }
+
         session()->regenerate();
+
         return redirect()->route('dashboard.index', Auth::id());
     }
 
@@ -45,4 +52,5 @@ class Login extends Component
         return view('livewire.auth.login')->layout('layouts.app', ['titulo' => 'Inicio de sesión']);
     }
 }
+
 
